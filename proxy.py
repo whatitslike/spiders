@@ -41,11 +41,6 @@ class _Proxy:
                 print(e)
 
     def get(self):
-        # reset proxies after 3600 times
-        self._counter += 1
-        if self._counter > 3600:
-            self.__proxies = []
-
         if not self.__proxies:
             self._retrieve_proxy()
 
