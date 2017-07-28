@@ -5,6 +5,7 @@ import threading
 from elasticsearch import Elasticsearch
 
 from . import logger
+from .types import Types
 from .agent import do_request
 from q import zhihu_c, zhihu_qname
 
@@ -33,7 +34,13 @@ class ZhihuModel:
         now = datetime.datetime.now()
         now_str = now.strftime("%Y-%m-%d %H:%M:%S")
         data.update({'_added_at': now_str})
-        es.index(index='zhihu', doc_type=type, id=data['id'], body=data)
+        if type == Types.PEOPLE:
+            i = data['id']
+            data['pid'] = i
+            del data['id']
+            es.index(index='zhihu', doc_type=type, body=data)
+        else:
+            es.index(index='zhihu', doc_type=type, id=data['id'], body=data)
 
     @classmethod
     def _do_job(cls):
