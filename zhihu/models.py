@@ -38,9 +38,11 @@ class ZhihuModel:
             i = data['id']
             data['pid'] = i
             del data['id']
-            es.index(index='zhihu', doc_type=type, body=data)
+            result = es.index(index='zhihu', doc_type=type, body=data)
         else:
-            es.index(index='zhihu', doc_type=type, id=data['id'], body=data)
+            result = es.index(index='zhihu', doc_type=type, id=data['id'], body=data)
+
+        logger.info('save result ', result)
 
     @classmethod
     def _do_job(cls):
@@ -49,7 +51,8 @@ class ZhihuModel:
 
     @classmethod
     def start(cls):
-        t = threading.Thread(target=cls._do_job)
-        t.daemon = True
-        t.start()
+        for _ in range(4):
+            t = threading.Thread(target=cls._do_job)
+            t.daemon = True
+            t.start()
 
