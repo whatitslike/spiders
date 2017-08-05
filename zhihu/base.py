@@ -42,15 +42,18 @@ class BaseSource:
             answer_json_objs = do_request(url)
 
     def publish(self, url, type, site='zhihu'):
-        self._zhihu_ch.basic_publish(
-            exchange='',
-            routing_key=site,
-            body=json.dumps({'url': url, 'type': type}),
-            properties=pika.BasicProperties(
-                delivery_mode=2,  # make message persistent
+        try:
+            self._zhihu_ch.basic_publish(
+                exchange='',
+                routing_key=site,
+                body=json.dumps({'url': url, 'type': type}),
+                properties=pika.BasicProperties(
+                    delivery_mode=2,  # make message persistent
+                )
             )
-        )
-        self._logger.info('published %s %s' % (url, type))
+            self._logger.info('published %s %s' % (url, type))
+        except pika.exceptions.ConnectionClosed:
+            print('reconnect required!')
 
     def _parse(self, json_objs):
         raise NotImplementedError
