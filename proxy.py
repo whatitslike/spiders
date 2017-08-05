@@ -38,6 +38,7 @@ class _Proxy:
             if ip and port:
                 url = 'http://%s:%s' % (ip[0].text, port[0].text)
                 self.__proxies.append(url)
+                print(url)
 
     def _parse_xici_content(self, soup_obj):
         trs = soup_obj.find_all('tr')
@@ -48,11 +49,21 @@ class _Proxy:
             if ip and port:
                 url = 'http://%s:%s' % (ip, port)
                 self.__proxies.append(url)
+                print(url)
 
     def _retrieve_proxy(self):
         for url in self._kuaidaili_proxy_repo:
             try:
-                r = requests.get(url, timeout=2)
+                r = requests.get(
+                    url,
+                    timeout=2,
+                    headers={
+                        'User-Agent': (
+                            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36'
+                            ' (KHTML, like Gecko) Chrome/60.0.3112.78 Safari/537.36'
+                        )
+                    }
+                )
                 soup = BeautifulSoup(r.content, 'lxml')
                 self._parse_kuaidaili_content(soup)
             except Exception as e:

@@ -6,7 +6,7 @@ import traceback
 
 import pika
 
-from q import zhihu_c
+from q import get_ch, zhihu_qname
 from . import logger
 from .agent import do_request
 from .types import Types
@@ -17,6 +17,7 @@ class BaseSource:
     def __init__(self):
         self._logger = logger
         self._start_urls = []
+        self._zhihu_ch = get_ch(zhihu_qname)
 
     def _parse_answer_url(self, q_url):
         schema = 'https://api.zhihu.com/questions/%s/answers'
@@ -41,7 +42,7 @@ class BaseSource:
             answer_json_objs = do_request(url)
 
     def publish(self, url, type, site='zhihu'):
-        zhihu_c.basic_publish(
+        self._zhihu_ch.basic_publish(
             exchange='',
             routing_key=site,
             body=json.dumps({'url': url, 'type': type}),

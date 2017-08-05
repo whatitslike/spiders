@@ -1,7 +1,3 @@
-import sys
-import time
-
-
 from zhihu import (
     explore_feeds,
     topstories,
@@ -11,7 +7,6 @@ from zhihu import (
     topics,
     people,
 )
-from .models import ZhihuModel
 
 
 class Spider:
@@ -26,12 +21,7 @@ class Spider:
             topics.Topics(),
             people.People(),
         ]
-        self.consumers = [ZhihuModel, ]
 
     def do_crawl(self):
         for source in self.sources:
             source.start()
-
-        for consumer in self.consumers:
-            consumer.start()
-

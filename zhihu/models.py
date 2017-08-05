@@ -2,12 +2,13 @@ import json
 import datetime
 import threading
 
+import pika
 from elasticsearch import Elasticsearch
 
 from . import logger
 from .types import Types
 from .agent import do_request
-from q import zhihu_c, zhihu_qname
+from q import get_ch, zhihu_qname
 
 
 es = Elasticsearch()
@@ -46,8 +47,13 @@ class ZhihuModel:
 
     @classmethod
     def _do_job(cls):
-        zhihu_c.basic_consume(cls.save, zhihu_qname, no_ack=True)
-        zhihu_c.start_consuming()
+        while True:
+            try:
+                ch = get_ch(zhihu_qname)
+                ch.basic_consume(cls.save, zhihu_qname, no_ack=True)
+                ch.start_consuming()
+            except pika.exceptions.ConnectionClosed:
+                print('reconnect required!')
 
     @classmethod
     def start(cls):
