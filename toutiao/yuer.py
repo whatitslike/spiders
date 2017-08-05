@@ -1,4 +1,6 @@
+import re
 import time
+import html
 import datetime
 import threading
 
@@ -24,21 +26,42 @@ class Spider:
             url,
             proxies=[proxy, ]
         )
-        obj = r.json()
-        return obj
+        return r
+
+    def _get_content(self, group_id):
+        url = 'https://www.toutiao.com' + group_id
+        r = self._do_request(url)
+        result = r.content
+        content = result.decode('utf8')
+
+        r = re.search(r'content: (.*?)groupId: ', content, re.DOTALL)
+        if not r:
+            return ''
+
+        c = r.groups(1)[0].strip()
+        c = html.unescape(c)
+        return c[:-26]
 
     def _start(self, start_url):
-        obj = self._do_request(start_url)
+        r = self._do_request(start_url)
+        obj = r.json()
         while obj:
             for d in obj['data']:
                 data = d
+
+                content = self._get_content(d['source_url'])
+                self.logger.info(content)
+                data.update({'content': content})
+
                 now = datetime.datetime.now()
                 now_str = now.strftime("%Y-%m-%d %H:%M:%S")
                 data.update({'_added_at': now_str})
+
                 self.es.index(index='toutiao', doc_type='feed', body=data)
 
             url = start_url + '&max_behot_time=' + str(obj['next']['max_behot_time'])
-            obj = self._do_request(url)
+            r = self._do_request(url)
+            obj = r.json()
 
     def start(self):
         for start_url in self._start_urls:
