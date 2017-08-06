@@ -2,12 +2,12 @@ import re
 import time
 import html
 import datetime
+import traceback
 import threading
 
 import requests
 from elasticsearch import Elasticsearch
 
-from proxy import proxy_pool
 from utils import get_logger
 
 
@@ -21,16 +21,21 @@ class Spider:
         self.es = Elasticsearch()
 
     def _do_request(self, url):
-        proxy = proxy_pool.get()
-        r = requests.get(
-            url,
-            proxies=[proxy, ]
-        )
-        return r
+        try:
+            r = requests.get(
+                url,
+            )
+            return r
+        except Exception as e:
+            print(e)
+            traceback.print_exc()
 
     def _get_content(self, group_id):
         url = 'https://www.toutiao.com' + group_id
         r = self._do_request(url)
+        if not r:
+            return ''
+
         result = r.content
         content = result.decode('utf8')
 
@@ -42,10 +47,15 @@ class Spider:
         c = html.unescape(c)
         return c[:-26]
 
-    def _start(self, start_url):
-        r = self._do_request(start_url)
-        obj = r.json()
-        while obj:
+    def _start(self, url):
+        _start_url = url
+        while True:
+            r = self._do_request(url)
+            if not r:
+                continue
+
+            obj = r.json()
+
             for d in obj['data']:
                 data = d
 
@@ -59,9 +69,7 @@ class Spider:
 
                 self.es.index(index='toutiao', doc_type='feed', body=data)
 
-            url = start_url + '&max_behot_time=' + str(obj['next']['max_behot_time'])
-            r = self._do_request(url)
-            obj = r.json()
+            url = _start_url + '&max_behot_time=' + str(obj['next']['max_behot_time'])
 
     def start(self):
         for start_url in self._start_urls:

@@ -1,4 +1,6 @@
+import os
 import random
+import datetime
 
 import requests
 from bs4 import BeautifulSoup
@@ -6,9 +8,43 @@ from bs4 import BeautifulSoup
 
 class _Proxy:
 
+    def _load_proxy(self):
+        f = os.path.join(self._cur, 'proxy.txt')
+        with open(f) as _f:
+            lines = _f.readlines()
+            for line in lines:
+                line = line.strip()
+                self.__proxies.append(line)
+
+    def _load_updated(self):
+        f = os.path.join(self._cur, 'updated')
+        with open(f, 'r') as _f:
+            c = _f.read()
+            c = c.strip()
+            return datetime.datetime.strptime(c, '%Y-%m-%d')
+
+    def _update_updated(self):
+        now = datetime.datetime.now()
+        f = os.path.join(self._cur, 'updated')
+        with open(f, 'w') as _f:
+            _f.write(now.strftime('%Y-%m-%d'))
+
+    def _save_to_file(self):
+        if not self.__proxies:
+            return
+
+        f = os.path.join(self._cur, 'proxy.txt')
+        with open(f, 'w') as _f:
+            for p in self.__proxies:
+                _f.write(p + '\n')
+
+            self._update_updated()
+
     def __init__(self):
-        self._counter = 0
         self.__proxies = []
+
+        self._cur = os.path.dirname(os.path.realpath(__file__))
+
         self._kuaidaili_proxy_repo = [
             'http://www.kuaidaili.com/free/inha/1/',
             'http://www.kuaidaili.com/free/inha/2/',
@@ -29,6 +65,16 @@ class _Proxy:
             'http://www.xicidaili.com/wt/5',
             'http://www.xicidaili.com/wt/6',
         ]
+
+        # always load proxy from file
+        self._load_proxy()
+
+        # check updated old than 1day
+        date = self._load_updated()
+        now = datetime.datetime.now()
+        if (now - date).days > 1:
+            self._retrieve_proxy()
+            self._save_to_file()
 
     def _parse_kuaidaili_content(self, soup_obj):
         trs = soup_obj.find_all('tr')
@@ -56,13 +102,14 @@ class _Proxy:
             try:
                 r = requests.get(
                     url,
-                    timeout=2,
                     headers={
                         'User-Agent': (
                             'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36'
                             ' (KHTML, like Gecko) Chrome/60.0.3112.78 Safari/537.36'
                         )
-                    }
+                    },
+                    proxies=[self.get(),],
+                    timeout=2,
                 )
                 soup = BeautifulSoup(r.content, 'lxml')
                 self._parse_kuaidaili_content(soup)
@@ -73,13 +120,14 @@ class _Proxy:
             try:
                 r = requests.get(
                     url,
-                    timeout=3,
                     headers={
                         'User-Agent': (
                             'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36'
                             ' (KHTML, like Gecko) Chrome/60.0.3112.78 Safari/537.36'
                         )
-                    }
+                    },
+                    proxies=[self.get(),],
+                    timeout=3,
                 )
                 soup = BeautifulSoup(r.content, 'lxml')
                 self._parse_xici_content(soup)
@@ -87,9 +135,6 @@ class _Proxy:
                 print(e)
 
     def get(self):
-        if not self.__proxies:
-            self._retrieve_proxy()
-
         return random.choice(self.__proxies)
 
 

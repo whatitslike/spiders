@@ -23,6 +23,6 @@ _headers = {
 def do_request(url):
     logger.info(url)
     proxy = proxy_pool.get()
-    r = requests.get(url, headers=_headers, proxies=[proxy, ])
+    r = requests.get(url, headers=_headers, proxies={'http': proxy})
     jsobj = json.loads(r.content)
     return jsobj
