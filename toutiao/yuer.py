@@ -67,7 +67,7 @@ class Spider:
                 now_str = now.strftime("%Y-%m-%d %H:%M:%S")
                 data.update({'_added_at': now_str})
 
-                self.es.index(index='toutiao', doc_type='feed', body=data)
+                self.es.index(index='toutiao', doc_type='feed', body=data, id=data['group_id'])
 
             url = _start_url + '&max_behot_time=' + str(obj['next']['max_behot_time'])
 
