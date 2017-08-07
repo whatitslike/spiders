@@ -69,7 +69,7 @@ class Spider:
 
                 self.es.index(index='toutiao', doc_type='feed', body=data, id=data['group_id'])
 
-            # url = _start_url + '&max_behot_time=' + str(obj['next']['max_behot_time'])
+            url = _start_url + '&max_behot_time=' + str(obj['next']['max_behot_time'])
 
     def start(self):
         for start_url in self._start_urls:
