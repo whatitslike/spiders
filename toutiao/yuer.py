@@ -16,6 +16,8 @@ class Spider:
     def __init__(self):
         self._start_urls = [
             'https://www.toutiao.com/api/pc/feed/?category=news_baby',
+            'https://www.toutiao.com/api/pc/feed/?category=news_health',
+            'https://www.toutiao.com/api/pc/feed/?category=news_edu',
         ]
         self.logger = get_logger('toutiao')
         self.es = Elasticsearch()
