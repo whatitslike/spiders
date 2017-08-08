@@ -8,10 +8,10 @@ from proxy import proxy_pool
 
 _headers = {
     'User-Agent': 'osee2unifiedRelease/3.53.0 (iPhone; iOS 10.3.2; Scale/2.00)',
-    'x-app-za': 'OS=iOS&Release=10.3.2&Model=iPhone5,2&VersionName=3.53.0&VersionCode=634&Width=640&Height=1136',
+    'x-app-za': 'OS=iOS&Release=10.3.2&Model=iPhone5,2&VersionName=3.56.0&VersionCode=668&Width=640&Height=1136',
     'X-UUID': 'ADDCp6n3-wtLBf1ji8mZKMzrJRMw29chulc=',
-    'X-API-Version': '3.0.59',
-    'X-APP-VERSION': '3.53.0',
+    'X-API-Version': '3.0.62',
+    'X-APP-VERSION': '3.56.0',
     'Authorization': 'Bearer gt2.0AAAAAAVS-HUL-_epp8IwAAAAAAtNVQJgAgDrwCAkhbZVGCqAKUzf2ACgctdj1A==',
     'X-APP-Build': 'release',
     'X-Network-Type': 'Wifi',
