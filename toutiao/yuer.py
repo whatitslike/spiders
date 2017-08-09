@@ -9,6 +9,7 @@ import requests
 from elasticsearch import Elasticsearch
 
 from utils import get_logger
+from proxy import proxy_pool
 
 
 class Spider:
@@ -19,13 +20,20 @@ class Spider:
             'https://www.toutiao.com/api/pc/feed/?category=news_health',
             'https://www.toutiao.com/api/pc/feed/?category=news_edu',
         ]
+        args = '&min_behot_time=0&utm_source=toutiao&widen=1&tadrequire=true&as=A105D9A8AAA50CE&cp=598A85704CCE9E1'
+        self._start_urls = [u + args for u in self._start_urls]
         self.logger = get_logger('toutiao')
         self.es = Elasticsearch()
 
     def _do_request(self, url):
+        proxy = proxy_pool.get()
         try:
             r = requests.get(
                 url,
+                proxies={'http': proxy},
+                headers={
+                    'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36',
+                }
             )
             return r
         except Exception as e:
