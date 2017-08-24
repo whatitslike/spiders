@@ -2,3 +2,4 @@ pika==0.10.0
 daemonize==2.4.7
 requests==2.12.4
 beautifulsoup4==4.5.3
+selenium
